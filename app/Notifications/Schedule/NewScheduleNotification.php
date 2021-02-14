@@ -13,6 +13,7 @@ namespace CachetHQ\Cachet\Notifications\Schedule;
 
 use CachetHQ\Cachet\Models\Schedule;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\NexmoMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
@@ -24,7 +25,7 @@ use McCool\LaravelAutoPresenter\Facades\AutoPresenter;
  *
  * @author James Brooks <james@alt-three.com>
  */
-class NewScheduleNotification extends Notification
+class NewScheduleNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -81,7 +82,7 @@ class NewScheduleNotification extends Notification
                 'unsubscribeUrl'         => cachet_route('subscribe.unsubscribe', $notifiable->verify_code),
                 'manageSubscriptionText' => trans('cachet.subscriber.manage_subscription'),
                 'manageSubscriptionUrl'  => cachet_route('subscribe.manage', $notifiable->verify_code),
-        ]);
+            ]);
     }
 
     /**
@@ -121,10 +122,9 @@ class NewScheduleNotification extends Notification
                         $attachment->title($content)
                                    ->timestamp($this->schedule->getWrappedObject()->scheduled_at)
                                    ->fields(array_filter([
-                                        'ID'     => "#{$this->schedule->id}",
-                                        'Status' => $this->schedule->human_status,
-                                    ]))
-                                   ->footer(trans('cachet.subscriber.unsubscribe', ['link' => cachet_route('subscribe.unsubscribe', $notifiable->verify_code)]));
+                                       'ID'     => "#{$this->schedule->id}",
+                                       'Status' => $this->schedule->human_status,
+                                   ]));
                     });
     }
 }
